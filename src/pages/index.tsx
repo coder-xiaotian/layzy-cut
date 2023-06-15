@@ -150,7 +150,7 @@ ${subtitles.join("\n")}`;
           margin="dense"
           label="音频"
           type="file"
-          onChange={(e) => (audioRef.current = e.target.files[0])}
+          onChange={(e: any) => (audioRef.current = e.target.files[0])}
         />
         <TextField
           focused
