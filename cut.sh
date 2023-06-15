@@ -61,7 +61,7 @@ do
     echo "$t" >> sub.srt
 done
 
-text="subtitles=sub.srt:force_style='Alignment=6,FontSize=16,OutlineColour=&H008fff,BorderStyle=3,BoxBorderRadius=25'"
+text="subtitles=sub.srt:force_style='Alignment=6,FontSize=16,OutlineColour=&H008fff,BorderStyle=3'"
 
 # Get input video width and height
 width=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 "$input_video_path")
