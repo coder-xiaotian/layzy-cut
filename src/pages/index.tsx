@@ -1,4 +1,4 @@
-import { ffmpeg, fetchFile } from "@/utils/ffmpeg";
+import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg'
 import { getVideoMetadata } from "@/utils/video";
 import {
   Box,
@@ -10,9 +10,14 @@ import {
   LinearProgress
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import {saveAs} from "file-saver"
 
+let ffmpeg: any
+(async () => {
+  ffmpeg = createFFmpeg({ log: true, corePath: `${location.protocol + location.host}/ffmpeg-core.js`});
+  await ffmpeg.load();
+})()
 export default function Home() {
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
@@ -53,7 +58,7 @@ export default function Home() {
     ffmpeg.FS(
       "writeFile",
       `tmp/fonts`,
-      await fetchFile("http://localhost:3000/YeZiGongChangChuanQiuShaXingKai-2.ttf")
+      await fetchFile(`${location.protocol + location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
     );
     
     const files = videoFiles.filter(Boolean)
@@ -102,7 +107,7 @@ ${subtitles.join("\n")}`;
           "output.mp4",
         ]
       );
-      ffmpeg.setProgress((p) => {
+      ffmpeg.setProgress((p: any) => {
         setProgressValue(p.ratio * (i + 1))
       })
       await ffmpeg.run(...cmd);
