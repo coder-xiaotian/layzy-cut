@@ -1,4 +1,4 @@
-import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg'
+import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import { getVideoMetadata } from "@/utils/video";
 import {
   Box,
@@ -7,17 +7,17 @@ import {
   Stack,
   TextField,
   Tooltip,
-  LinearProgress
+  LinearProgress,
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import {saveAs} from "file-saver"
+import { ChangeEvent, useRef, useState } from "react";
+import { saveAs } from "file-saver";
 
-let ffmpeg: any
+let ffmpeg: any;
 (async () => {
-  ffmpeg = createFFmpeg({ log: true, corePath: `${location.protocol + location.host}/ffmpeg-core.js`});
+  ffmpeg = createFFmpeg({ log: true });
   await ffmpeg.load();
-})()
+})();
 export default function Home() {
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
@@ -30,40 +30,40 @@ export default function Home() {
   ) {
     for (let file of Array.from(files)) {
       const { name } = file;
-        console.log("%c name: ", "color: red", name)
-        ffmpeg.FS("writeFile", name, await fetchFile(file));
-        await ffmpeg.run(
-          "-i",
-          name,
-          "-y",
-          "-f",
-          "image2",
-          "-frames",
-          "1",
-          "preview.jpg"
-        );
-        const data = ffmpeg.FS("readFile", "preview.jpg");
-        // @ts-ignore
-        file.previewUrl = URL.createObjectURL(new Blob([data.buffer]));
-        ffmpeg.FS("unlink", "preview.jpg");
-        videoFiles.unshift(file as any)
+      console.log("%c name: ", "color: red", name);
+      ffmpeg.FS("writeFile", name, await fetchFile(file));
+      await ffmpeg.run(
+        "-i",
+        name,
+        "-y",
+        "-f",
+        "image2",
+        "-frames",
+        "1",
+        "preview.jpg"
+      );
+      const data = ffmpeg.FS("readFile", "preview.jpg");
+      // @ts-ignore
+      file.previewUrl = URL.createObjectURL(new Blob([data.buffer]));
+      ffmpeg.FS("unlink", "preview.jpg");
+      videoFiles.unshift(file as any);
     }
-    setVideoFiles([...videoFiles])
+    setVideoFiles([...videoFiles]);
   }
 
-  const [progressValue, setProgressValue] = useState(null)
+  const [progressValue, setProgressValue] = useState(null);
   async function handleGenerate() {
-    setProgressValue(0)
+    setProgressValue(0);
     // 写入字体文件
     ffmpeg.FS(
       "writeFile",
       `tmp/fonts`,
-      await fetchFile(`${location.protocol + location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
+      await fetchFile(`/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
     );
-    
-    const files = videoFiles.filter(Boolean)
-    for (let i=0; i<files.length; i++) {
-      const file = files[i]
+
+    const files = videoFiles.filter(Boolean);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
 
       const { width, height } = await getVideoMetadata(file);
       const outputWidth = width;
@@ -108,21 +108,29 @@ ${subtitles.join("\n")}`;
         ]
       );
       ffmpeg.setProgress((p: any) => {
-        setProgressValue(p.ratio * (i + 1))
-      })
+        setProgressValue(p.ratio * (i + 1));
+      });
       await ffmpeg.run(...cmd);
       const data = ffmpeg.FS("readFile", "output.mp4");
-      saveAs(new Blob([data.buffer], { type: "video/mp4" }), `output${i + 1}.mp4`)
-      ffmpeg.FS("unlink", "output.mp4")
+      saveAs(
+        new Blob([data.buffer], { type: "video/mp4" }),
+        `output${i + 1}.mp4`
+      );
+      ffmpeg.FS("unlink", "output.mp4");
     }
 
-    setProgressValue(null)
+    setProgressValue(null);
   }
 
   return (
     <Container maxWidth="sm">
       <Box overflow={"auto"}>
-        <Stack direction="row" spacing={2} justifyContent="center" display="inline-flex">
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="center"
+          display="inline-flex"
+        >
           {videoFiles.map((file, i) =>
             file ? (
               <Tooltip key={i} title={file.name} placement="top">
@@ -171,7 +179,7 @@ ${subtitles.join("\n")}`;
         生成短视频
       </Button>
       {progressValue !== null && (
-        <LinearProgress color="success" value={progressValue}/>
+        <LinearProgress color="success" value={progressValue} />
       )}
     </Container>
   );
