@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "基于 Cursor（GPT-3.5）辅助生成的简单抖音视频生成工具。",
   "scripts": {
-    "dev": "cross-env CORE_PATH=http://localhost:3000 node server.js",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint"
   },
   "repository": {
