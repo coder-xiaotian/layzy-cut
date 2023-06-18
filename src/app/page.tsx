@@ -1,4 +1,5 @@
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+'use client'
+import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
 import { getVideoMetadata } from "@/utils/video";
 import {
   Box,
@@ -10,20 +11,21 @@ import {
   LinearProgress,
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
 
-let ffmpeg: any;
-(async () => {
-  ffmpeg = createFFmpeg({ log: true });
-  await ffmpeg.load();
-})();
 export default function Home() {
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
   const [videoFiles, setVideoFiles] = useState<
     Array<(File & { previewUrl: string }) | null>
   >([null]);
+  const ffmpegRef = useRef<FFmpeg>();
+  useEffect(() => {
+    const corePath = process.env.NODE_ENV === "development" ? `${location.protocol}${location.host}/ffmpeg-core.js` : undefined
+      ffmpegRef.current = createFFmpeg({ log: true, corePath });
+      ffmpegRef.current.load();
+  }, [])
   async function handleFileChange(
     { target: { files } }: ChangeEvent<HTMLInputElement>,
     i: number
@@ -31,8 +33,8 @@ export default function Home() {
     for (let file of Array.from(files)) {
       const { name } = file;
       console.log("%c name: ", "color: red", name);
-      ffmpeg.FS("writeFile", name, await fetchFile(file));
-      await ffmpeg.run(
+      ffmpegRef.current.FS("writeFile", name, await fetchFile(file));
+      await ffmpegRef.current.run(
         "-i",
         name,
         "-y",
@@ -42,10 +44,10 @@ export default function Home() {
         "1",
         "preview.jpg"
       );
-      const data = ffmpeg.FS("readFile", "preview.jpg");
+      const data = ffmpegRef.current.FS("readFile", "preview.jpg");
       // @ts-ignore
       file.previewUrl = URL.createObjectURL(new Blob([data.buffer]));
-      ffmpeg.FS("unlink", "preview.jpg");
+      ffmpegRef.current.FS("unlink", "preview.jpg");
       videoFiles.unshift(file as any);
     }
     setVideoFiles([...videoFiles]);
@@ -55,10 +57,10 @@ export default function Home() {
   async function handleGenerate() {
     setProgressValue(0);
     // 写入字体文件
-    ffmpeg.FS(
+    ffmpegRef.current.FS(
       "writeFile",
       `tmp/fonts`,
-      await fetchFile(`/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
+      await fetchFile(`${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
     );
 
     const files = videoFiles.filter(Boolean);
@@ -75,7 +77,7 @@ export default function Home() {
         const srt = `1
 00:00:00,000 --> 00:00:10,000
 ${subtitles.join("\n")}`;
-        ffmpeg.FS("writeFile", "sub.srt", await fetchFile(Buffer.from(srt)));
+        ffmpegRef.current.FS("writeFile", "sub.srt", await fetchFile(Buffer.from(srt)));
         filters.push(
           `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H008fff,BorderStyle=3,WrapStyle=2'`
         );
@@ -83,7 +85,7 @@ ${subtitles.join("\n")}`;
       const { name } = file;
       const cmd = ["-i", name];
       if (audioRef.current) {
-        ffmpeg.FS(
+        ffmpegRef.current.FS(
           "writeFile",
           audioRef.current.name,
           await fetchFile(audioRef.current)
@@ -107,16 +109,16 @@ ${subtitles.join("\n")}`;
           "output.mp4",
         ]
       );
-      ffmpeg.setProgress((p: any) => {
+      ffmpegRef.current.setProgress((p: any) => {
         setProgressValue(p.ratio * (i + 1));
       });
-      await ffmpeg.run(...cmd);
-      const data = ffmpeg.FS("readFile", "output.mp4");
+      await ffmpegRef.current.run(...cmd);
+      const data = ffmpegRef.current.FS("readFile", "output.mp4");
       saveAs(
         new Blob([data.buffer], { type: "video/mp4" }),
         `output${i + 1}.mp4`
       );
-      ffmpeg.FS("unlink", "output.mp4");
+      ffmpegRef.current.FS("unlink", "output.mp4");
     }
 
     setProgressValue(null);
