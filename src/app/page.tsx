@@ -9,6 +9,7 @@ import {
   TextField,
   Tooltip,
   LinearProgress,
+  CircularProgress
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ import { saveAs } from "file-saver";
 export default function Home() {
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
+  const [loadingFFmpeg, setLoadingFFmpeg] = useState(true)
   const [videoFiles, setVideoFiles] = useState<
     Array<(File & { previewUrl: string }) | null>
   >([null]);
@@ -26,7 +28,9 @@ export default function Home() {
       log: true,
       corePath: `${location.protocol}${location.host}/ffmpeg-core.js`,
     });
-    ffmpegRef.current.load();
+    ffmpegRef.current.load().then(() => {
+      setLoadingFFmpeg(false)
+    });
   }, []);
   async function handleFileChange(
     { target: { files } }: ChangeEvent<HTMLInputElement>,
@@ -134,62 +138,70 @@ ${subtitles.join("\n")}`;
 
   return (
     <Container maxWidth="sm">
-      <Box overflow={"auto"}>
-        <Stack
-          direction="row"
-          spacing={2}
-          justifyContent="center"
-          display="inline-flex"
-        >
-          {videoFiles.map((file, i) =>
-            file ? (
-              <Tooltip key={i} title={file.name} placement="top">
-                <div className="relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black">
-                  <div className="relative z-10 flex flex-col items-center mt-2 text-[28px]">
-                    {subtitles &&
-                      subtitles.map((str, i) => (
-                        <span key={i} className="bg-[#ef8900] text-white">
-                          {str}
-                        </span>
-                      ))}
-                  </div>
-                  <img
-                    className="absolute top-1/2 w-full -translate-y-1/2"
-                    src={file.previewUrl}
-                    alt="preview"
-                  />
-                  <div></div>
-                </div>
-              </Tooltip>
-            ) : (
-              <VideoUploader key={i} onUpload={handleFileChange as any} />
-            )
+      {loadingFFmpeg ? (
+        <div className="text-center">
+          <CircularProgress/>
+        </div>
+      ) : (
+        <>
+          <Box overflow={"auto"}>
+            <Stack
+              direction="row"
+              spacing={2}
+              justifyContent="center"
+              display="inline-flex"
+            >
+              {videoFiles.map((file, i) =>
+                file ? (
+                  <Tooltip key={i} title={file.name} placement="top">
+                    <div className="relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black">
+                      <div className="relative z-10 flex flex-col items-center mt-2 text-[28px]">
+                        {subtitles &&
+                          subtitles.map((str, i) => (
+                            <span key={i} className="bg-[#ef8900] text-white">
+                              {str}
+                            </span>
+                          ))}
+                      </div>
+                      <img
+                        className="absolute top-1/2 w-full -translate-y-1/2"
+                        src={file.previewUrl}
+                        alt="preview"
+                      />
+                      <div></div>
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <VideoUploader key={i} onUpload={handleFileChange as any} />
+                )
+              )}
+            </Stack>
+          </Box>
+          <Box>
+            <TextField
+              focused
+              margin="dense"
+              label="音频"
+              type="file"
+              onChange={(e: any) => (audioRef.current = e.target.files[0])}
+            />
+            <TextField
+              focused
+              margin="dense"
+              multiline
+              rows={4}
+              label="字幕"
+              value={subtitles.join("\n")}
+              onChange={(e) => setSubtitles(e.target.value.split("\n"))}
+            />
+          </Box>
+          <Button onClick={handleGenerate} variant="contained">
+            生成短视频
+          </Button>
+          {progressValue !== null && (
+            <LinearProgress color="success" value={progressValue} />
           )}
-        </Stack>
-      </Box>
-      <Box>
-        <TextField
-          focused
-          margin="dense"
-          label="音频"
-          type="file"
-          onChange={(e: any) => (audioRef.current = e.target.files[0])}
-        />
-        <TextField
-          focused
-          margin="dense"
-          multiline
-          rows={4}
-          label="字幕"
-          value={subtitles.join("\n")}
-          onChange={(e) => setSubtitles(e.target.value.split("\n"))}
-        />
-      </Box>
-      <Button onClick={handleGenerate} variant="contained">
-        生成短视频
-      </Button>
-      {progressValue !== null && (
-        <LinearProgress color="success" value={progressValue} />
+        </>
       )}
     </Container>
   );
