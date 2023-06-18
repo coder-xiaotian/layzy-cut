@@ -24,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     ffmpegRef.current = createFFmpeg({
       log: true,
-      corePath: "https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js",
+      corePath: `${location.protocol}${location.host}/ffmpeg-core.js`,
     });
     ffmpegRef.current.load();
   }, []);
