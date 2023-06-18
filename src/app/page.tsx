@@ -22,8 +22,8 @@ export default function Home() {
   >([null]);
   const ffmpegRef = useRef<FFmpeg>();
   useEffect(() => {
-    const corePath = process.env.NODE_ENV === "development" ? `${location.protocol}${location.host}/ffmpeg-core.js` : undefined
-      ffmpegRef.current = createFFmpeg({ log: true, corePath });
+    const corePathProp = process.env.NODE_ENV === "development" ? {corePath: `${location.protocol}${location.host}/ffmpeg-core.js`} : undefined
+      ffmpegRef.current = createFFmpeg({ log: true, ...corePathProp });
       ffmpegRef.current.load();
   }, [])
   async function handleFileChange(
