@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
 import { getVideoMetadata } from "@/utils/video";
 import {
@@ -22,10 +22,15 @@ export default function Home() {
   >([null]);
   const ffmpegRef = useRef<FFmpeg>();
   useEffect(() => {
-    const corePathProp = process.env.NODE_ENV === "development" ? {corePath: `${location.protocol}${location.host}/ffmpeg-core.js`} : undefined
-      ffmpegRef.current = createFFmpeg({ log: true, ...corePathProp });
-      ffmpegRef.current.load();
-  }, [])
+    ffmpegRef.current = createFFmpeg({
+      log: true,
+      corePath:
+        process.env.NODE_ENV === "development"
+          ? `${location.protocol}${location.host}/ffmpeg-core.js`
+          : "https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js",
+    });
+    ffmpegRef.current.load();
+  }, []);
   async function handleFileChange(
     { target: { files } }: ChangeEvent<HTMLInputElement>,
     i: number
@@ -60,7 +65,9 @@ export default function Home() {
     ffmpegRef.current.FS(
       "writeFile",
       `tmp/fonts`,
-      await fetchFile(`${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`)
+      await fetchFile(
+        `${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`
+      )
     );
 
     const files = videoFiles.filter(Boolean);
@@ -77,7 +84,11 @@ export default function Home() {
         const srt = `1
 00:00:00,000 --> 00:00:10,000
 ${subtitles.join("\n")}`;
-        ffmpegRef.current.FS("writeFile", "sub.srt", await fetchFile(Buffer.from(srt)));
+        ffmpegRef.current.FS(
+          "writeFile",
+          "sub.srt",
+          await fetchFile(Buffer.from(srt))
+        );
         filters.push(
           `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H008fff,BorderStyle=3,WrapStyle=2'`
         );
