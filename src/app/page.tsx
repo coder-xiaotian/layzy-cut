@@ -11,6 +11,7 @@ import {
   LinearProgress,
   CircularProgress,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -18,6 +19,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
 
 export default function Home() {
+  const [cutSeconds, setCutSeconds] = useState(10)
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
   const [loadingFFmpeg, setLoadingFFmpeg] = useState(true);
@@ -85,7 +87,7 @@ export default function Home() {
       filters.push(`pad=${outputWidth}:${outputHeight}:0:${y}:black`);
       if (subtitles.length) {
         const srt = `1
-00:00:00,000 --> 00:00:10,000
+00:00:00,000 --> 00:00:${cutSeconds},000
 ${subtitles.join("\n")}`;
         ffmpegRef.current.FS(
           "writeFile",
@@ -115,7 +117,7 @@ ${subtitles.join("\n")}`;
           "-ss",
           "0",
           "-to",
-          "10",
+          String(cutSeconds),
           "-preset",
           "ultrafast",
           "-af",
@@ -193,7 +195,17 @@ ${subtitles.join("\n")}`;
               )}
             </Stack>
           </Box>
-          <Stack>
+          <Stack className="mt-2">
+            <TextField
+              value={cutSeconds}
+              type="number"
+              onChange={e => setCutSeconds(Number(e.target.value))}
+              label="剪辑前"
+              focused
+              InputProps={{
+                endAdornment: <InputAdornment position="start">秒</InputAdornment>,
+              }}
+            />
             <TextField
               focused
               margin="dense"
