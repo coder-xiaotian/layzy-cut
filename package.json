@@ -1,0 +1,50 @@
+{
+  "name": "lazy-cut",
+  "version": "1.0.0",
+  "description": "基于 Cursor（GPT-3.5）辅助生成的简单抖音视频生成工具。",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coder-xiaotian/layzy-cut.git"
+  },
+  "keywords": [
+    "ffmpeg"
+  ],
+  "author": "xiaotian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/coder-xiaotian/layzy-cut/issues"
+  },
+  "homepage": "https://github.com/coder-xiaotian/layzy-cut#readme",
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@ffmpeg/core": "^0.11.0",
+    "@ffmpeg/ffmpeg": "^0.11.6",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.5",
+    "@types/node": "20.3.0",
+    "@types/react": "18.2.11",
+    "@types/react-dom": "18.2.4",
+    "autoprefixer": "10.4.14",
+    "eslint": "8.42.0",
+    "eslint-config-next": "13.4.5",
+    "file-saver": "^2.0.5",
+    "next": "13.4.6",
+    "postcss": "8.4.24",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.1.3"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.5",
+    "cross-env": "^7.0.3"
+  }
+}
