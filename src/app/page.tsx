@@ -9,16 +9,18 @@ import {
   TextField,
   Tooltip,
   LinearProgress,
-  CircularProgress
+  CircularProgress,
+  IconButton,
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import CloseIcon from "@mui/icons-material/Close";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
 
 export default function Home() {
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
-  const [loadingFFmpeg, setLoadingFFmpeg] = useState(true)
+  const [loadingFFmpeg, setLoadingFFmpeg] = useState(true);
   const [videoFiles, setVideoFiles] = useState<
     Array<(File & { previewUrl: string }) | null>
   >([null]);
@@ -29,7 +31,7 @@ export default function Home() {
       corePath: `${location.protocol}${location.host}/ffmpeg-core.js`,
     });
     ffmpegRef.current.load().then(() => {
-      setLoadingFFmpeg(false)
+      setLoadingFFmpeg(false);
     });
   }, []);
   async function handleFileChange(
@@ -140,11 +142,11 @@ ${subtitles.join("\n")}`;
     <Container maxWidth="sm">
       {loadingFFmpeg ? (
         <div className="text-center">
-          <CircularProgress/>
+          <CircularProgress />
         </div>
       ) : (
         <>
-          <Box overflow={"auto"}>
+          <Box overflow={"auto"} className="pt-3">
             <Stack
               direction="row"
               spacing={2}
@@ -154,7 +156,7 @@ ${subtitles.join("\n")}`;
               {videoFiles.map((file, i) =>
                 file ? (
                   <Tooltip key={i} title={file.name} placement="top">
-                    <div className="relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black">
+                    <div className="group relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black border-2 hover:border-green-500">
                       <div className="relative z-10 flex flex-col items-center mt-2 text-[28px]">
                         {subtitles &&
                           subtitles.map((str, i) => (
@@ -169,6 +171,20 @@ ${subtitles.join("\n")}`;
                         alt="preview"
                       />
                       <div></div>
+                      <Tooltip title="删除">
+                        <IconButton
+                          size="small"
+                          className="invisible group-hover:visible absolute z-20 top-0 right-0 
+                        translate-x-1/2 -translate-y-1/2"
+                          color="error"
+                          onClick={() => {
+                            videoFiles.splice(i, 1)
+                            setVideoFiles([...videoFiles])
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
                     </div>
                   </Tooltip>
                 ) : (
@@ -177,7 +193,7 @@ ${subtitles.join("\n")}`;
               )}
             </Stack>
           </Box>
-          <Box>
+          <Stack>
             <TextField
               focused
               margin="dense"
@@ -194,13 +210,13 @@ ${subtitles.join("\n")}`;
               value={subtitles.join("\n")}
               onChange={(e) => setSubtitles(e.target.value.split("\n"))}
             />
-          </Box>
-          <Button onClick={handleGenerate} variant="contained">
-            生成短视频
-          </Button>
+          </Stack>
           {progressValue !== null && (
             <LinearProgress color="success" value={progressValue} />
           )}
+          <Button onClick={handleGenerate} variant="contained">
+            生成短视频
+          </Button>
         </>
       )}
     </Container>
