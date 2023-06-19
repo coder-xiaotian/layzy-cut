@@ -42,7 +42,6 @@ export default function Home() {
   ) {
     for (let file of Array.from(files)) {
       const { name } = file;
-      console.log("%c name: ", "color: red", name);
       ffmpegRef.current.FS("writeFile", name, await fetchFile(file));
       await ffmpegRef.current.run(
         "-i",
@@ -137,6 +136,7 @@ ${subtitles.join("\n")}`;
       ffmpegRef.current.FS("unlink", "output.mp4");
     }
 
+    ffmpegRef.current.setProgress(() => {})
     setProgressValue(null);
   }
 
@@ -176,7 +176,7 @@ ${subtitles.join("\n")}`;
                       <Tooltip title="删除">
                         <IconButton
                           size="small"
-                          className="invisible group-hover:visible absolute z-20 top-0 right-0 
+                          className="invisible group-hover:visible !absolute z-20 top-0 right-0 
                         translate-x-1/2 -translate-y-1/2"
                           color="error"
                           onClick={() => {
