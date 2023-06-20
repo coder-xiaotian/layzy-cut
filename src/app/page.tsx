@@ -12,8 +12,12 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon
 } from "@mui/material";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 import CloseIcon from "@mui/icons-material/Close";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
@@ -144,6 +148,15 @@ ${subtitles.join("\n")}`;
     enqueueSnackbar("生成短视频成功！", {variant: "success"})
   }
 
+  function handleContact() {
+    const a = document.createElement("a")
+    a.style.display = "none"
+    document.body.appendChild(a)
+    a.href = "mailto:wanxiaotian888@gmail.com"
+    a.click()
+    a.parentNode.removeChild(a)
+  }
+
   return (
     <Container maxWidth="sm">
       {loadingFFmpeg ? (
@@ -233,6 +246,9 @@ ${subtitles.join("\n")}`;
           <Button onClick={handleGenerate} variant="contained">
             生成短视频
           </Button>
+          <SpeedDial className="fixed right-4 bottom-4" icon={<SpeedDialIcon/>} ariaLabel="">
+            <SpeedDialAction icon={<AttachEmailIcon/>} tooltipTitle="联系我" onClick={handleContact}/>
+          </SpeedDial>
         </>
       )}
     </Container>
