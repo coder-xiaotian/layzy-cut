@@ -33,3 +33,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+cut2.sh
+input.mp4
+output.mp4
+subtitles.ass
+touming.jpg

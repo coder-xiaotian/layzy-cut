@@ -94,7 +94,7 @@ ${subtitles.join("\n")}`;
           await fetchFile(Buffer.from(srt))
         );
         filters.push(
-          `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H008fff,BorderStyle=3,WrapStyle=2'`
+          `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H82008fff,BorderStyle=3,WrapStyle=2'`
         );
       }
       const { name } = file;
