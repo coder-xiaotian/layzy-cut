@@ -1,5 +1,6 @@
 'use client'
 import { createTheme, ThemeProvider } from '@mui/material';
+import {SnackbarProvider} from "notistack"
 
 const theme = createTheme({
   components: {
@@ -19,6 +20,8 @@ const theme = createTheme({
 
 export default function Providers({children}: any) {
   return (
-    <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    <SnackbarProvider maxSnack={3}>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </SnackbarProvider>
   )
 }

@@ -17,8 +17,11 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
+import { useSnackbar } from "notistack";
 
 export default function Home() {
+  const {enqueueSnackbar} = useSnackbar()
+
   const [cutSeconds, setCutSeconds] = useState(10)
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
@@ -138,6 +141,7 @@ ${subtitles.join("\n")}`;
 
     ffmpegRef.current.setProgress(() => {})
     setProgressValue(null);
+    enqueueSnackbar("生成短视频成功！", {variant: "success"})
   }
 
   return (
