@@ -278,8 +278,8 @@ function VideoUploader({ onUpload }: any) {
       onClick={() => inputRef.current.click()}
       className="cursor-pointer shrink-0 flex flex-col justify-center items-center w-[300px] h-[533px] bg-slate-100"
     >
-      <FileUploadIcon className="text-slate-300" />
-      <span className="text-slate-500">上传视频</span>
+      <FileUploadIcon className="text-slate-300 text-5xl" />
+      <span className="text-slate-500">点击上传视频</span>
       <input
         ref={inputRef}
         className="invisible"
