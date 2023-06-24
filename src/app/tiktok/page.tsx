@@ -1,50 +1,61 @@
 "use client";
-import { createFFmpeg, fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
 import { getVideoMetadata } from "@/utils/video";
+import { fetchFile } from "@ffmpeg/ffmpeg";
+import AttachEmailIcon from "@mui/icons-material/AttachEmail";
+import CloseIcon from "@mui/icons-material/Close";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import {
   Box,
   Button,
-  Container,
-  Stack,
-  TextField,
-  Tooltip,
-  LinearProgress,
   CircularProgress,
-  IconButton,
-  InputAdornment,
-  SpeedDial,
+  Container,
+  IconButton, InputAdornment,
+  LinearProgress, SpeedDial,
   SpeedDialAction,
   SpeedDialIcon,
-  Slider
+  Stack,
+  TextField,
+  Tooltip
 } from "@mui/material";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import AttachEmailIcon from '@mui/icons-material/AttachEmail';
-import CloseIcon from "@mui/icons-material/Close";
-import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
 import { useSnackbar } from "notistack";
+import { ChangeEvent, useContext, useRef, useState } from "react";
 import { FFmpegContext } from "../template";
+import { CutTime } from "./components";
+import TimeFormat from "hh-mm-ss"
 
 export default function TikTok() {
-  const {loading, ffmpeg} = useContext(FFmpegContext)
-  const {enqueueSnackbar} = useSnackbar()
+  const { loading, ffmpeg } = useContext(FFmpegContext);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [cutSeconds, setCutSeconds] = useState(10)
+  const [cutTimes, setCutTimes] = useState([0, 10]);
+  const [firstVideoSecond, setFiestVideoSecond] = useState(0);
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
   const [videoFiles, setVideoFiles] = useState<
-    Array<(File & { previewUrl: string }) | null>
+    Array<(File & { previewUrl: string; width: number; height: number }) | null>
   >([null]);
-  async function handleFileChange(
-    { target: { files } }: ChangeEvent<HTMLInputElement>,
-    i: number
-  ) {
-    for (let file of Array.from(files)) {
-      const { name } = file;
-      ffmpeg.FS("writeFile", name, await fetchFile(file));
+  const isUploadedVideo = videoFiles.filter(Boolean).length > 0
+  async function handleFileChange({
+    target: { files },
+  }: ChangeEvent<HTMLInputElement>) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i] as any;
+
+      getVideoMetadata(file).then(({ width, height, duration }) => {
+        duration = Number(duration.toFixed())
+        file.width = width;
+        file.height = height;
+        file.duration = duration;
+        if (i !== 0) return;
+
+        setFiestVideoSecond(duration);
+      });
+
+      ffmpeg.FS("writeFile", file.name, await fetchFile(file));
       await ffmpeg.run(
         "-i",
-        name,
+        file.name,
         "-y",
         "-f",
         "image2",
@@ -53,7 +64,6 @@ export default function TikTok() {
         "preview.jpg"
       );
       const data = ffmpeg.FS("readFile", "preview.jpg");
-      // @ts-ignore
       file.previewUrl = URL.createObjectURL(new Blob([data.buffer]));
       ffmpeg.FS("unlink", "preview.jpg");
       videoFiles.unshift(file as any);
@@ -85,13 +95,9 @@ export default function TikTok() {
       filters.push(`pad=${outputWidth}:${outputHeight}:0:${y}:black`);
       if (subtitles.length) {
         const srt = `1
-00:00:00,000 --> 00:00:${cutSeconds},000
+${TimeFormat.fromS(cutTimes[0], "hh:mm:ss")},000 --> ${TimeFormat.fromS(cutTimes[1], "hh:mm:ss")},000
 ${subtitles.join("\n")}`;
-        ffmpeg.FS(
-          "writeFile",
-          "sub.srt",
-          await fetchFile(Buffer.from(srt))
-        );
+        ffmpeg.FS("writeFile", "sub.srt", await fetchFile(Buffer.from(srt)));
         filters.push(
           `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H82008fff,BorderStyle=3,WrapStyle=2'`
         );
@@ -113,9 +119,9 @@ ${subtitles.join("\n")}`;
           "-vf",
           filters.join(","),
           "-ss",
-          "0",
+          String(cutTimes[0]),
           "-to",
-          String(cutSeconds),
+          String(cutTimes[1]),
           "-preset",
           "ultrafast",
           "-af",
@@ -135,18 +141,18 @@ ${subtitles.join("\n")}`;
       ffmpeg.FS("unlink", "output.mp4");
     }
 
-    ffmpeg.setProgress(() => {})
+    ffmpeg.setProgress(() => {});
     setProgressValue(null);
-    enqueueSnackbar("生成短视频成功！", {variant: "success"})
+    enqueueSnackbar("生成短视频成功！", { variant: "success" });
   }
 
   function handleContact() {
-    const a = document.createElement("a")
-    a.style.display = "none"
-    document.body.appendChild(a)
-    a.href = "mailto:wanxiaotian888@gmail.com"
-    a.click()
-    a.parentNode.removeChild(a)
+    const a = document.createElement("a");
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.href = "mailto:wanxiaotian888@gmail.com";
+    a.click();
+    a.parentNode.removeChild(a);
   }
 
   return (
@@ -166,38 +172,15 @@ ${subtitles.join("\n")}`;
             >
               {videoFiles.map((file, i) =>
                 file ? (
-                  <Tooltip key={i} title={file.name} placement="top">
-                    <div className="group relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black border-2 hover:border-green-500">
-                      <div className="relative z-10 flex flex-col items-center mt-2 text-[28px]">
-                        {subtitles &&
-                          subtitles.map((str, i) => (
-                            <span key={i} className="bg-[#ef8900] text-white">
-                              {str}
-                            </span>
-                          ))}
-                      </div>
-                      <img
-                        className="absolute top-1/2 w-full -translate-y-1/2"
-                        src={file.previewUrl}
-                        alt="preview"
-                      />
-                      <div></div>
-                      <Tooltip title="删除">
-                        <IconButton
-                          size="small"
-                          className="invisible group-hover:visible !absolute z-20 top-0 right-0 
-                        translate-x-1/2 -translate-y-1/2"
-                          color="error"
-                          onClick={() => {
-                            videoFiles.splice(i, 1)
-                            setVideoFiles([...videoFiles])
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </div>
-                  </Tooltip>
+                  <VideoPreview
+                    key={i}
+                    file={file}
+                    subtitles={subtitles}
+                    onDelete={() => {
+                      videoFiles.splice(i, 1);
+                      setVideoFiles([...videoFiles]);
+                    }}
+                  />
                 ) : (
                   <VideoUploader key={i} onUpload={handleFileChange as any} />
                 )
@@ -205,19 +188,14 @@ ${subtitles.join("\n")}`;
             </Stack>
           </Box>
           <Stack className="mt-2">
-            <TextField
-              value={cutSeconds}
-              type="number"
-              onChange={e => setCutSeconds(Number(e.target.value))}
-              label="剪辑前"
-              focused
-              InputProps={{
-                endAdornment: <InputAdornment position="start">秒</InputAdornment>,
-              }}
-            />
             <Box>
               <span>剪辑</span>
-              <Slider/>
+              <CutTime
+                disabled={!isUploadedVideo}
+                max={firstVideoSecond}
+                value={cutTimes}
+                onChange={setCutTimes}
+              />
             </Box>
             <TextField
               focused
@@ -239,15 +217,57 @@ ${subtitles.join("\n")}`;
           {progressValue !== null && (
             <LinearProgress color="success" value={progressValue} />
           )}
-          <Button onClick={handleGenerate} variant="contained">
+          <Button disabled={!isUploadedVideo} onClick={handleGenerate} variant="contained">
             生成短视频
           </Button>
-          <SpeedDial className="fixed right-4 bottom-4" icon={<SpeedDialIcon/>} ariaLabel="">
-            <SpeedDialAction icon={<AttachEmailIcon/>} tooltipTitle="联系我" onClick={handleContact}/>
+          <SpeedDial
+            className="fixed right-4 bottom-4"
+            icon={<SpeedDialIcon />}
+            ariaLabel=""
+          >
+            <SpeedDialAction
+              icon={<AttachEmailIcon />}
+              tooltipTitle="联系我"
+              onClick={handleContact}
+            />
           </SpeedDial>
         </>
       )}
     </Container>
+  );
+}
+
+function VideoPreview({ file, subtitles, onDelete }: any) {
+  return (
+    <Tooltip title={`${file.name} ${TimeFormat.fromS(file.duration, "hh:mm:ss")}`} placement="top">
+      <div className="group relative shrink-0 flex flex-col w-[300px] h-[533px] bg-black border-2 hover:border-green-500">
+        <div className="relative z-10 flex flex-col items-center mt-2 text-[28px]">
+          {subtitles &&
+            subtitles.map((str: string, i: number) => (
+              <span key={i} className="bg-[#ef8900] text-white">
+                {str}
+              </span>
+            ))}
+        </div>
+        <img
+          className="absolute top-1/2 w-full -translate-y-1/2"
+          src={file.previewUrl}
+          alt="preview"
+        />
+        <div></div>
+        <Tooltip title="删除">
+          <IconButton
+            size="small"
+            className="invisible group-hover:visible !absolute z-20 top-0 right-0 
+                        translate-x-1/2 -translate-y-1/2"
+            color="error"
+            onClick={onDelete}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+    </Tooltip>
   );
 }
 
@@ -266,6 +286,7 @@ function VideoUploader({ onUpload }: any) {
         type="file"
         onChange={onUpload}
         multiple
+        accept="video/*"
       />
     </div>
   );

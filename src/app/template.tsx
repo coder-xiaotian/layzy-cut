@@ -38,6 +38,7 @@ function useFFmpeg() {
 
   return ffmpegValues
 }
+
 export default function Template({ children }: any) {
   const router = useRouter();
   const selectedSegment = useSelectedLayoutSegment();
@@ -92,6 +93,9 @@ export default function Template({ children }: any) {
                         {pages.map((page) => (
                           <MenuItem
                             key={page.name}
+                            className={classNames({
+                              "!bg-slate-300": page.name === selectedSegment,
+                            })}
                             onClick={() => router.push(`/${page.name}`)}
                           >
                             <Typography textAlign="center">
@@ -128,7 +132,7 @@ export default function Template({ children }: any) {
                   <Button
                     key={page.name}
                     className={classNames("text-white", {
-                      "bg-blue-400": page.name === selectedSegment,
+                      "!bg-blue-400": page.name === selectedSegment,
                     })}
                     onClick={() => router.push(`/${page.name}`)}
                   >
