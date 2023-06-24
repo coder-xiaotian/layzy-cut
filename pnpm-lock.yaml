@@ -13,10 +13,12 @@ specifiers:
   '@types/react-dom': 18.2.4
   '@vercel/analytics': ^1.0.1
   autoprefixer: 10.4.14
+  classnames: ^2.3.2
   cross-env: ^7.0.3
   eslint: 8.42.0
   eslint-config-next: 13.4.5
   file-saver: ^2.0.5
+  material-ui-popup-state: ^5.0.9
   next: 13.4.6
   notistack: ^3.0.1
   postcss: 8.4.24
@@ -37,9 +39,11 @@ dependencies:
   '@types/react-dom': 18.2.4
   '@vercel/analytics': 1.0.1
   autoprefixer: 10.4.14_postcss@8.4.24
+  classnames: 2.3.2
   eslint: 8.42.0
   eslint-config-next: 13.4.5_eslint@8.42.0+typescript@5.1.3
   file-saver: 2.0.5
+  material-ui-popup-state: 5.0.9_4d329bb5d29194907619b15b5fc511ca
   next: 13.4.6_react-dom@18.2.0+react@18.2.0
   notistack: 3.0.1_react-dom@18.2.0+react@18.2.0
   postcss: 8.4.24
@@ -1028,6 +1032,10 @@ packages:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.2
+    dev: false
+
+  /classnames/2.3.2:
+    resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
     dev: false
 
   /client-only/0.0.1:
@@ -2255,6 +2263,23 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       yallist: 4.0.0
+    dev: false
+
+  /material-ui-popup-state/5.0.9_4d329bb5d29194907619b15b5fc511ca:
+    resolution: {integrity: sha512-NjTm7zdEzOY1CHu+a2to6h1Jr1Y8ra24rZ2JF5teO/+g0wTNiKWwNT04v3oW3McHsLcTfG46yYcqf1iznjst8Q==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.22.5
+      '@mui/material': 5.13.5_4d329bb5d29194907619b15b5fc511ca
+      classnames: 2.3.2
+      prop-types: 15.8.1
+      react: 18.2.0
+    transitivePeerDependencies:
+      - '@emotion/react'
+      - '@emotion/styled'
+      - '@types/react'
+      - react-dom
     dev: false
 
   /merge-stream/2.0.0:
