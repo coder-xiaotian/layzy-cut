@@ -20,17 +20,18 @@ import {
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 import CloseIcon from "@mui/icons-material/Close";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
 import { useSnackbar } from "notistack";
+import { FFmpegContext } from "../template";
 
-export default function Douyin() {
+export default function TikTok() {
+  const {loading, ffmpeg} = useContext(FFmpegContext)
   const {enqueueSnackbar} = useSnackbar()
 
   const [cutSeconds, setCutSeconds] = useState(10)
   const [subtitles, setSubtitles] = useState([]);
   const audioRef = useRef<File>(null);
-  const [loadingFFmpeg, setLoadingFFmpeg] = useState(true);
   const [videoFiles, setVideoFiles] = useState<
     Array<(File & { previewUrl: string }) | null>
   >([null]);
@@ -40,8 +41,8 @@ export default function Douyin() {
   ) {
     for (let file of Array.from(files)) {
       const { name } = file;
-      ffmpegRef.current.FS("writeFile", name, await fetchFile(file));
-      await ffmpegRef.current.run(
+      ffmpeg.FS("writeFile", name, await fetchFile(file));
+      await ffmpeg.run(
         "-i",
         name,
         "-y",
@@ -51,10 +52,10 @@ export default function Douyin() {
         "1",
         "preview.jpg"
       );
-      const data = ffmpegRef.current.FS("readFile", "preview.jpg");
+      const data = ffmpeg.FS("readFile", "preview.jpg");
       // @ts-ignore
       file.previewUrl = URL.createObjectURL(new Blob([data.buffer]));
-      ffmpegRef.current.FS("unlink", "preview.jpg");
+      ffmpeg.FS("unlink", "preview.jpg");
       videoFiles.unshift(file as any);
     }
     setVideoFiles([...videoFiles]);
@@ -64,7 +65,7 @@ export default function Douyin() {
   async function handleGenerate() {
     setProgressValue(0);
     // 写入字体文件
-    ffmpegRef.current.FS(
+    ffmpeg.FS(
       "writeFile",
       `tmp/fonts`,
       await fetchFile(
@@ -86,7 +87,7 @@ export default function Douyin() {
         const srt = `1
 00:00:00,000 --> 00:00:${cutSeconds},000
 ${subtitles.join("\n")}`;
-        ffmpegRef.current.FS(
+        ffmpeg.FS(
           "writeFile",
           "sub.srt",
           await fetchFile(Buffer.from(srt))
@@ -98,7 +99,7 @@ ${subtitles.join("\n")}`;
       const { name } = file;
       const cmd = ["-i", name];
       if (audioRef.current) {
-        ffmpegRef.current.FS(
+        ffmpeg.FS(
           "writeFile",
           audioRef.current.name,
           await fetchFile(audioRef.current)
@@ -122,19 +123,19 @@ ${subtitles.join("\n")}`;
           "output.mp4",
         ]
       );
-      ffmpegRef.current.setProgress((p: any) => {
+      ffmpeg.setProgress((p: any) => {
         setProgressValue(p.ratio * (i + 1));
       });
-      await ffmpegRef.current.run(...cmd);
-      const data = ffmpegRef.current.FS("readFile", "output.mp4");
+      await ffmpeg.run(...cmd);
+      const data = ffmpeg.FS("readFile", "output.mp4");
       saveAs(
         new Blob([data.buffer], { type: "video/mp4" }),
         `output${i + 1}.mp4`
       );
-      ffmpegRef.current.FS("unlink", "output.mp4");
+      ffmpeg.FS("unlink", "output.mp4");
     }
 
-    ffmpegRef.current.setProgress(() => {})
+    ffmpeg.setProgress(() => {})
     setProgressValue(null);
     enqueueSnackbar("生成短视频成功！", {variant: "success"})
   }
@@ -150,7 +151,7 @@ ${subtitles.join("\n")}`;
 
   return (
     <Container maxWidth="sm">
-      {loadingFFmpeg ? (
+      {loading ? (
         <div className="text-center">
           <CircularProgress />
         </div>

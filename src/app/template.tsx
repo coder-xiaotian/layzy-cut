@@ -16,20 +16,12 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 import Image from "next/image";
 import classNames from "classnames";
-import { createContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFFmpeg, FFmpeg } from "@ffmpeg/ffmpeg";
+import { getContext } from "./providers";
 
-const FFmpegContext = createContext<{ loading: boolean; ffmpeg: FFmpeg }>(
-  null
-);
-export default function Template({ children }: any) {
-  const router = useRouter();
-  const selectedSegment = useSelectedLayoutSegment();
-  const pages = [
-    { name: "tiktok", label: "剪辑短视频" },
-    { name: "apply-lut", label: "LUT调色" },
-  ];
-
+export const FFmpegContext = getContext(useFFmpeg)
+function useFFmpeg() {
   const [ffmpeg, setFFmpeg] = useState<FFmpeg>(null)
   useEffect(() => {
     const f = createFFmpeg({
@@ -41,8 +33,19 @@ export default function Template({ children }: any) {
     });
   }, []);
   const ffmpegValues = useMemo(() => ({
-    loading: !!ffmpeg, ffmpeg
+    loading: !ffmpeg, ffmpeg
   }), [ffmpeg])
+
+  return ffmpegValues
+}
+export default function Template({ children }: any) {
+  const router = useRouter();
+  const selectedSegment = useSelectedLayoutSegment();
+  const pages = [
+    { name: "tiktok", label: "剪辑短视频" },
+    { name: "apply-lut", label: "LUT调色" },
+  ];
+  const ffmpegValues = useFFmpeg()
 
   return (
     <FFmpegContext.Provider value={ffmpegValues}>
