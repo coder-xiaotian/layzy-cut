@@ -2,7 +2,7 @@
 const nextConfig = {
   async headers() {
     return [{
-      source: '/tiktok',
+      source: '/:path*',
       headers: [{
         key: "Cross-Origin-Embedder-Policy",
         value: "require-corp"

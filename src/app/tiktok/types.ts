@@ -1,0 +1,1 @@
+export type VideoFile = File & { previewUrl: string; width: number; height: number, duration: number }
