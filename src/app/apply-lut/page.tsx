@@ -1,18 +1,17 @@
 "use client";
 import VideoUploader from "@/components/video-uploader";
+import { fetchFile } from "@ffmpeg/ffmpeg";
 import {
-  Box,
   Button,
   Container,
   LinearProgress,
   Stack,
-  TextField,
+  TextField
 } from "@mui/material";
-import { ChangeEvent, useContext, useState } from "react";
-import { FFmpegContext } from "../providers";
-import { fetchFile } from "@ffmpeg/ffmpeg";
 import { saveAs } from "file-saver";
 import { useSnackbar } from "notistack";
+import { ChangeEvent, useContext, useState } from "react";
+import { FFmpegContext } from "../providers";
 
 export default function ApplyLUT() {
   const { enqueueSnackbar } = useSnackbar();

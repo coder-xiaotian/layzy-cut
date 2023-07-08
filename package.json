@@ -40,7 +40,7 @@
     "file-saver": "^2.0.5",
     "hh-mm-ss": "^1.2.0",
     "material-ui-popup-state": "^5.0.9",
-    "next": "13.4.6",
+    "next": "13.4.8",
     "notistack": "^3.0.1",
     "postcss": "8.4.24",
     "react": "18.2.0",
@@ -51,6 +51,7 @@
   "devDependencies": {
     "@types/file-saver": "^2.0.5",
     "@types/hh-mm-ss": "^1.2.1",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "use-client": "^1.0.2"
   }
 }

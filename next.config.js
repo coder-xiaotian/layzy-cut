@@ -11,6 +11,16 @@ const nextConfig = {
         value: "same-origin"
       }]
     }]
+  },
+  experimental: {
+    swcPlugins: [
+      [
+        'use-client',
+        {
+          include: ["@mui/material"]
+        }
+      ],
+    ]
   }
 }
 

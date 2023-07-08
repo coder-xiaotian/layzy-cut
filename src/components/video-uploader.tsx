@@ -109,6 +109,11 @@ function Preview({ file, subtitles, onDelete }: any) {
 
 function Uploader({ onUpload }: any) {
   const inputRef = useRef<HTMLInputElement>();
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    onUpload(e)
+    e.target.value = ""
+  }
+
   return (
     <div
       onClick={() => inputRef.current.click()}
@@ -120,7 +125,7 @@ function Uploader({ onUpload }: any) {
         ref={inputRef}
         className="invisible"
         type="file"
-        onChange={onUpload}
+        onChange={handleChange}
         multiple
         accept="video/*"
       />
