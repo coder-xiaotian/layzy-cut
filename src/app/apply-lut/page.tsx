@@ -1,6 +1,6 @@
 "use client";
 import VideoUploader from "@/components/video-uploader";
-import { fetchFile } from "@ffmpeg/ffmpeg";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import {
   Button,
   Container,
@@ -10,28 +10,27 @@ import {
 } from "@mui/material";
 import { saveAs } from "file-saver";
 import { useSnackbar } from "notistack";
-import { ChangeEvent, useContext, useState } from "react";
-import { FFmpegContext } from "../providers";
+import { ChangeEvent, useState } from "react";
 
 export default function ApplyLUT() {
   const { enqueueSnackbar } = useSnackbar();
-  const { ffmpeg } = useContext(FFmpegContext);
+  const { runCommand, setProgress, readFile, writeFile, deleteFile } = useFFmpeg();
   const [videoFiles, setVideoFiles] = useState([]);
   const [lutFile, setLUTFile] = useState<File>();
   const [currentExportProcess, setCurrentExportProcess] = useState<number>(null);
   const [currentExportName, setCurrentExportName] = useState("")
   async function handleExport() {
-    ffmpeg.setProgress(({ ratio }: any) => {
+    await setProgress(({ ratio }: any) => {
       setCurrentExportProcess(Number((ratio * 100).toFixed()));
     });
 
     for (let i = 0; i < videoFiles.length; i++) {
       const file = videoFiles[i];
       setCurrentExportName(file.name)
-      ffmpeg.FS("writeFile", file.name, await fetchFile(file));
-      ffmpeg.FS("writeFile", `lut.cube`, await fetchFile(lutFile));
+      await writeFile(file.name, file);
+      await writeFile(`lut.cube`, lutFile);
       const outputFile = `output_${file.name}`;
-      await ffmpeg.run(
+      await runCommand(
         "-i",
         file.name,
         "-vf",
@@ -42,8 +41,7 @@ export default function ApplyLUT() {
         "ultrafast",
         outputFile
       );
-      // ffmpeg -i DJI_0991.MOV -vf lut3d="DJI Mavic 3 D-Log to Rec.709 vivid V1.cube",format=yuv420p -c:a copy -c:v libx264 -preset slow -crf 18  output.MOV
-      const data = ffmpeg.FS("readFile", outputFile);
+      const data = await readFile(outputFile);
       saveAs(new Blob([data.buffer], { type: "video/*" }), outputFile);
       enqueueSnackbar(`${file.name}导出完成！`, {variant: "success"});
       setCurrentExportProcess(null);

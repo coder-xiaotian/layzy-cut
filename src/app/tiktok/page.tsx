@@ -1,7 +1,7 @@
 "use client";
 import VideoUploader from "@/components/video-uploader";
+import { useFFmpeg } from "@/hooks/useFFmpeg";
 import { getVideoMetadata } from "@/utils/video";
-import { fetchFile } from "@ffmpeg/ffmpeg";
 import {
   Box,
   Button,
@@ -13,13 +13,12 @@ import {
 import { saveAs } from "file-saver";
 import TimeFormat from "hh-mm-ss";
 import { useSnackbar } from "notistack";
-import { useContext, useRef, useState } from "react";
-import { FFmpegContext } from "../providers";
+import { useRef, useState } from "react";
 import { CutTime } from "./components";
 import { VideoFile } from "./types";
 
 export default function TikTok() {
-  const { ffmpeg } = useContext(FFmpegContext);
+  const { runCommand, readFile, writeFile, deleteFile, setProgress } = useFFmpeg();
   const { enqueueSnackbar } = useSnackbar();
 
   const [cutTimes, setCutTimes] = useState([0, 10]);
@@ -31,21 +30,10 @@ export default function TikTok() {
   const [progressValue, setProgressValue] = useState(null);
   async function handleGenerate() {
     setProgressValue(0);
-    ffmpeg.setLogger(({ type, message }) => {
-      console.log(type, message);
-      // if (type === "fferr") {
-      //   console.error("出错了: ", message)
-      //   enqueueSnackbar("不好意思出错了，请向作者反馈！", {variant: "error"})
-      //   setProgressValue(null)
-      // }
-    });
     // 写入字体文件
-    ffmpeg.FS(
-      "writeFile",
+    await writeFile(
       `tmp/fonts`,
-      await fetchFile(
-        `${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`
-      )
+      `${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`
     );
 
     let subtitleFilters: string[] = []
@@ -56,7 +44,7 @@ ${TimeFormat.fromS(cutTimes[0], "hh:mm:ss")},000 --> ${TimeFormat.fromS(
         "hh:mm:ss"
       )},000
 ${subtitles.join("\n")}`;
-      ffmpeg.FS("writeFile", "sub.srt", await fetchFile(Buffer.from(srt)));
+      await writeFile("sub.srt", Buffer.from(srt));
       subtitleFilters = [`subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H82008fff,BorderStyle=3,WrapStyle=2'`]
     }
     const files = videoFiles.filter(Boolean);
@@ -71,13 +59,12 @@ ${subtitles.join("\n")}`;
       filters.push(`pad=${outputWidth}:${outputHeight}:0:${y}:black`);
       filters.push(...subtitleFilters)
       
-      ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+      await writeFile(file.name, file);
       const cmd = ["-i", file.name];
       if (audioRef.current) {
-        ffmpeg.FS(
-          "writeFile",
+        await writeFile(
           audioRef.current.name,
-          await fetchFile(audioRef.current)
+          audioRef.current
         );
         cmd.push(
           ...["-i", audioRef.current.name, "-map", "0:v", "-map", "1:a"]
@@ -101,21 +88,21 @@ ${subtitles.join("\n")}`;
           outputFile,
         ]
       );
-      ffmpeg.setProgress((p: any) => {
+      await setProgress((p: any) => {
         setProgressValue(p.ratio * (i + 1));
       });
-      await ffmpeg.run(...cmd);
-      const data = ffmpeg.FS("readFile", outputFile);
+      await runCommand(...cmd);
+      const data = await readFile(outputFile);
       saveAs(
         new Blob([data.buffer], { type: "video/*" }),
         `output_${file.name}`
       );
-      ffmpeg.FS("unlink", outputFile);
-      ffmpeg.FS("unlink", file.name);
+      deleteFile(outputFile);
+      deleteFile(file.name);
     }
 
-    subtitles.length && ffmpeg.FS("unlink", "sub.srt")
-    audioRef.current && ffmpeg.FS("unlink", audioRef.current.name)
+    subtitles.length && deleteFile("sub.srt")
+    audioRef.current && deleteFile(audioRef.current.name)
     setProgressValue(null);
     enqueueSnackbar("生成短视频成功！", { variant: "success" });
   }

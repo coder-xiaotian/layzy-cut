@@ -5,7 +5,6 @@ import {
   AppBar,
   Box,
   Button,
-  CircularProgress,
   Container,
   IconButton,
   Menu,
@@ -18,20 +17,17 @@ import {
 } from "@mui/material";
 import AttachEmailIcon from "@mui/icons-material/AttachEmail";
 import classNames from "classnames";
-import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import PopupState, {bindMenu, bindTrigger, InjectedProps} from "material-ui-popup-state";
 import Image from "next/image";
-import { useRouter, useSelectedLayoutSegment } from "next/navigation";
-import { useContext } from "react";
-import { FFmpegContext } from "./providers";
+import {useRouter, useSelectedLayoutSegment} from "next/navigation";
 
-export default function Template({ children }: any) {
+export default function Template({children}: any) {
   const router = useRouter();
   const selectedSegment = useSelectedLayoutSegment();
   const pages = [
-    { name: "tiktok", label: "剪辑短视频" },
-    { name: "apply-lut", label: "LUT调色" },
+    {name: "tiktok", label: "剪辑短视频"},
+    {name: "apply-lut", label: "LUT调色"},
   ];
-  const { loading } = useContext(FFmpegContext);
 
   function handleContact() {
     const a = document.createElement("a");
@@ -47,7 +43,7 @@ export default function Template({ children }: any) {
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Image src="/logo.png" alt="logo" width="40" height="40" />
+            <Image src="/logo.png" alt="logo" width="40" height="40"/>
             <Typography
               variant="h6"
               noWrap
@@ -55,7 +51,7 @@ export default function Template({ children }: any) {
               href="/"
               sx={{
                 mx: 2,
-                display: { xs: "none", md: "flex" },
+                display: {xs: "none", md: "flex"},
                 fontFamily: "monospace",
                 fontWeight: 700,
                 letterSpacing: ".3rem",
@@ -65,13 +61,12 @@ export default function Template({ children }: any) {
             >
               LazyCut
             </Typography>
-
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <Box sx={{flexGrow: 1, display: {xs: "flex", md: "none"}}}>
               <PopupState variant="popover">
-                {(popupState) => (
+                {(popupState: InjectedProps) => (
                   <>
                     <IconButton size="large" {...bindTrigger(popupState)}>
-                      <MenuIcon />
+                      <MenuIcon/>
                     </IconButton>
                     <Menu
                       {...bindMenu(popupState)}
@@ -80,7 +75,7 @@ export default function Template({ children }: any) {
                         horizontal: "left",
                       }}
                       sx={{
-                        display: { xs: "block", md: "none" },
+                        display: {xs: "block", md: "none"},
                       }}
                     >
                       {pages.map((page) => (
@@ -98,10 +93,10 @@ export default function Template({ children }: any) {
                       ))}
                     </Menu>
                   </>
-                )}
+                ) as any}
               </PopupState>
             </Box>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <AdbIcon sx={{display: {xs: "flex", md: "none"}, mr: 1}}/>
             <Typography
               variant="h5"
               noWrap
@@ -109,7 +104,7 @@ export default function Template({ children }: any) {
               href=""
               sx={{
                 mr: 2,
-                display: { xs: "flex", md: "none" },
+                display: {xs: "flex", md: "none"},
                 flexGrow: 1,
                 fontFamily: "monospace",
                 fontWeight: 700,
@@ -120,7 +115,7 @@ export default function Template({ children }: any) {
             >
               LOGO
             </Typography>
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+            <Box sx={{flexGrow: 1, display: {xs: "none", md: "flex"}}}>
               {pages.map((page) => (
                 <Button
                   key={page.name}
@@ -136,18 +131,14 @@ export default function Template({ children }: any) {
           </Toolbar>
         </Container>
       </AppBar>
-      {loading ? (
-        <div className="text-center">
-          <CircularProgress />
-        </div>
-      ) : children}
+      {children}
       <SpeedDial
         className="fixed right-4 bottom-4"
-        icon={<SpeedDialIcon />}
+        icon={<SpeedDialIcon/>}
         ariaLabel=""
       >
         <SpeedDialAction
-          icon={<AttachEmailIcon />}
+          icon={<AttachEmailIcon/>}
           tooltipTitle="联系我"
           onClick={handleContact}
         />

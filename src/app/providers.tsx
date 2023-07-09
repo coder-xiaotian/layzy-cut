@@ -17,39 +17,20 @@ const theme = createTheme({
         placement: "top",
       },
     },
+    MuiSkeleton: {
+      defaultProps: {
+        variant: "rounded",
+        animation: "wave"
+      }
+    }
   },
 });
 
-export const FFmpegContext = getContext(useFFmpeg);
-function useFFmpeg() {
-  const [ffmpeg, setFFmpeg] = useState<FFmpeg>(null);
-  useEffect(() => {
-    const f = createFFmpeg({
-      log: true,
-      corePath: `${location.protocol}${location.host}/ffmpeg-core.js`,
-    });
-    f.load().then(() => {
-      setFFmpeg(f);
-    });
-  }, []);
-  const ffmpegValues = useMemo(
-    () => ({
-      loading: !ffmpeg,
-      ffmpeg,
-    }),
-    [ffmpeg]
-  );
-
-  return ffmpegValues;
-}
 export default function Providers({ children }: any) {
-  const ffmpegValues = useFFmpeg();
   return (
-    <FFmpegContext.Provider value={ffmpegValues}>
       <SnackbarProvider maxSnack={3}>
         <ThemeProvider theme={theme}>{children}</ThemeProvider>
       </SnackbarProvider>
-    </FFmpegContext.Provider>
   );
 }
 
