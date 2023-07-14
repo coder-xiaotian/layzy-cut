@@ -1,8 +1,7 @@
 "use client";
-import { createFFmpeg, FFmpeg } from "@ffmpeg/ffmpeg";
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext } from "react";
 
 const theme = createTheme({
   components: {
@@ -20,17 +19,17 @@ const theme = createTheme({
     MuiSkeleton: {
       defaultProps: {
         variant: "rounded",
-        animation: "wave"
-      }
-    }
+        animation: "wave",
+      },
+    },
   },
 });
 
 export default function Providers({ children }: any) {
   return (
-      <SnackbarProvider maxSnack={3}>
-        <ThemeProvider theme={theme}>{children}</ThemeProvider>
-      </SnackbarProvider>
+    <SnackbarProvider maxSnack={3}>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </SnackbarProvider>
   );
 }
 

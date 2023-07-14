@@ -18,7 +18,8 @@ import { CutTime } from "./components";
 import { VideoFile } from "./types";
 
 export default function TikTok() {
-  const { runCommand, readFile, writeFile, deleteFile, setProgress } = useFFmpeg();
+  const { runCommand, readFile, writeFile, deleteFile, setProgress } =
+    useFFmpeg();
   const { enqueueSnackbar } = useSnackbar();
 
   const [cutTimes, setCutTimes] = useState([0, 10]);
@@ -36,7 +37,7 @@ export default function TikTok() {
       `${location.protocol}${location.host}/YeZiGongChangChuanQiuShaXingKai-2.ttf`
     );
 
-    let subtitleFilters: string[] = []
+    let subtitleFilters: string[] = [];
     if (subtitles.length) {
       const srt = `1
 ${TimeFormat.fromS(cutTimes[0], "hh:mm:ss")},000 --> ${TimeFormat.fromS(
@@ -45,7 +46,9 @@ ${TimeFormat.fromS(cutTimes[0], "hh:mm:ss")},000 --> ${TimeFormat.fromS(
       )},000
 ${subtitles.join("\n")}`;
       await writeFile("sub.srt", Buffer.from(srt));
-      subtitleFilters = [`subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H82008fff,BorderStyle=3,WrapStyle=2'`]
+      subtitleFilters = [
+        `subtitles=sub.srt:fontsdir=/tmp:force_style='Fontname=也字工厂川秋沙行楷 标准,Alignment=6,FontSize=16,OutlineColour=&H82008fff,BorderStyle=3,WrapStyle=2'`,
+      ];
     }
     const files = videoFiles.filter(Boolean);
     for (let i = 0; i < files.length; i++) {
@@ -57,20 +60,17 @@ ${subtitles.join("\n")}`;
       const y = Math.round(outputHeight / 2 - height / 2);
       const filters = [];
       filters.push(`pad=${outputWidth}:${outputHeight}:0:${y}:black`);
-      filters.push(...subtitleFilters)
-      
+      filters.push(...subtitleFilters);
+
       await writeFile(file.name, file);
       const cmd = ["-i", file.name];
       if (audioRef.current) {
-        await writeFile(
-          audioRef.current.name,
-          audioRef.current
-        );
+        await writeFile(audioRef.current.name, audioRef.current);
         cmd.push(
           ...["-i", audioRef.current.name, "-map", "0:v", "-map", "1:a"]
         );
       }
-      const outputFile = `output_${file.name}`
+      const outputFile = `output_${file.name}`;
       cmd.push(
         ...[
           "-vf",
@@ -101,8 +101,8 @@ ${subtitles.join("\n")}`;
       deleteFile(file.name);
     }
 
-    subtitles.length && deleteFile("sub.srt")
-    audioRef.current && deleteFile(audioRef.current.name)
+    subtitles.length && deleteFile("sub.srt");
+    audioRef.current && deleteFile(audioRef.current.name);
     setProgressValue(null);
     enqueueSnackbar("生成短视频成功！", { variant: "success" });
   }
