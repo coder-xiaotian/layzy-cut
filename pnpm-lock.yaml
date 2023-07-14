@@ -29,7 +29,7 @@ specifiers:
   react-dom: 18.2.0
   tailwindcss: 3.3.2
   typescript: 5.1.3
-  use-client: link:/Users/xiaotian/personal/tech/my-project/use-client
+  use-client: 1.0.4
 
 dependencies:
   '@emotion/react': 11.11.1_4f256518021de2725dc07933b44f0b99
@@ -56,7 +56,7 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
   tailwindcss: 3.3.2
   typescript: 5.1.3
-  use-client: link:../personal/tech/my-project/use-client
+  use-client: 1.0.4
 
 devDependencies:
   '@next/bundle-analyzer': 13.4.9
@@ -3228,6 +3228,10 @@ packages:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
     dependencies:
       punycode: 2.3.0
+    dev: false
+
+  /use-client/1.0.4:
+    resolution: {integrity: sha512-z2RfLMMgj0h+GUeWXC4LwVtAEJpKSEVcTG9o74ohSBFvtaOnd+7UFqA7KeSENHJJ7AcXkvrIb2G0Vt/dggcJnQ==}
     dev: false
 
   /util-deprecate/1.0.2:
